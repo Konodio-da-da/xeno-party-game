@@ -1,0 +1,20 @@
+/* client/src/styles/variables.css */
+:root {
+    /* Deep dark background to save battery and reduce glare */
+    --bg-base: #0a0a0c; 
+    --bg-surface: #17171c;
+    
+    /* Neon Accents for that party vibe */
+    --accent-pink: #ff1e56; 
+    --accent-cyan: #00e5ff;
+    
+    /* Text */
+    --text-primary: #ffffff;
+    --text-muted: #888891;
+    
+    --font-main: system-ui, -apple-system, sans-serif;
+    
+    /* Safe area for newer iPhones/Androids with notches and home bars */
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  

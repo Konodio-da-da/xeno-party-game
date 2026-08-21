@@ -1,0 +1,39 @@
+/* client/src/styles/BottomNav.css */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var(--bg-surface);
+    height: calc(65px + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-muted);
+    width: 33%;
+    gap: 4px;
+    transition: color 0.2s ease;
+  }
+  
+  .nav-item span {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  /* When the route is active, turn it Neon Pink */
+  .nav-item.active {
+    color: var(--accent-pink);
+  }
+  
+  .nav-item:active {
+    transform: scale(0.95); /* Little haptic-style bounce when tapped */
+  }
+  

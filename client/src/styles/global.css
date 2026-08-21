@@ -1,0 +1,38 @@
+/* client/src/styles/global.css */
+@import './variables.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Kills the blue tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent; 
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  
+  /* Stops pull-to-refresh and bouncing */
+  overscroll-behavior-y: none; 
+  overflow: hidden; 
+  
+  /* Stops users from accidentally highlighting text while tapping frantically */
+  user-select: none; 
+  -webkit-user-select: none;
+}
+
+#root {
+  /* 100dvh accounts for the dynamic browser UI bar on mobile */
+  height: 100dvh; 
+  display: flex;
+  flex-direction: column;
+}
+
+/* The area where the game screens will load */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
