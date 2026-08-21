@@ -8,17 +8,30 @@ require('dotenv').config();
 const app = express();
 
 // --- MIDDLEWARE ---
-app.use(cors());
+// Updated Express CORS to dynamically allow your Vercel frontend URL
+const allowedOrigins = [
+  process.env.CLIENT_URL, 
+  "http://localhost:5173", 
+  "https://your-xeno-app.vercel.app" // Fallback if CLIENT_URL isn't read instantly
+].filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json()); // Allow Express to parse JSON bodies
 
 const server = http.createServer(app);
 
-// Update CORS to allow your frontend URL
+// Update Socket.IO CORS to allow your frontend URL and enforce transports
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://your-xeno-app.vercel.app"],
-    methods: ["GET", "POST"]
-  }
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
 });
 
 // Store active game rooms in memory
@@ -26,7 +39,7 @@ const rooms = {};
 
 // --- REST API ROUTES ---
 
-// Health Check Route for Production (Render, Heroku, etc.)
+// Health Check Route for Production (Render, Heroku, Railway, etc.)
 app.get('/', (req, res) => {
   res.send('XENO Server is running!');
 });
@@ -549,6 +562,7 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
+// Listen on 0.0.0.0 for external routing compatibility
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`XENO Server running on port ${PORT}`);
 });
