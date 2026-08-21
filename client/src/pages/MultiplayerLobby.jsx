@@ -2,19 +2,20 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../socket';
-import { Users, LogIn, PlusCircle, Play, Gamepad2, ArrowLeft, ChevronDown } from 'lucide-react';
+import { Users, LogIn, PlusCircle, Play, ArrowLeft, ChevronDown } from 'lucide-react';
 import MostLikelyTo from '../games/MostLikelyTo';
 import MultiPhoneEngine from '../games/MultiPhoneEngine';
 import { multiPhoneGamesCatalog } from '../data/multiPhoneGames';
-import { useStatsStore } from '../store/statsStore'; // <-- ADDED IMPORT
+import { useStatsStore } from '../store/statsStore'; 
 
 export default function MultiplayerLobby() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { playerName: savedName } = useStatsStore(); // <-- PULL SAVED NAME
+  // ADDED: Pull unlockedPacks from your store to verify purchases
+  const { playerName: savedName, unlockedPacks = [] } = useStatsStore(); 
 
   const [selectedGame, setSelectedGame] = useState(location.state?.selectedGame || Object.values(multiPhoneGamesCatalog)[0]);
-  const [playerName, setPlayerName] = useState(savedName || ''); // <-- AUTO-FILL
+  const [playerName, setPlayerName] = useState(savedName || ''); 
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [currentRoom, setCurrentRoom] = useState(null);
   const [playersList, setPlayersList] = useState([]);
@@ -59,7 +60,7 @@ export default function MultiplayerLobby() {
     });
 
     socket.on('force-back-to-lobby', () => {
-      setIsPlaying(false); // Instantly switches the view back to the Lobby
+      setIsPlaying(false); 
     });
 
     socket.on('error-message', (msg) => {
@@ -72,12 +73,11 @@ export default function MultiplayerLobby() {
       socket.off('update-players');
       socket.off('game-type-changed');
       socket.off('game-started');
-      socket.off('force-back-to-lobby'); // <-- Add to cleanup
+      socket.off('force-back-to-lobby'); 
       socket.off('error-message');
       socket.disconnect();
     };
   }, []); 
-
 
   const handleCreateRoom = () => {
     if (!playerName.trim()) {
@@ -109,7 +109,6 @@ export default function MultiplayerLobby() {
     socket.emit('start-game', { roomCode: currentRoom, gameType: activeGameType });
   };
 
-
   if (isPlaying) {
     if (activeGameType === 'mostLikelyTo') {
       return <MostLikelyTo roomCode={currentRoom} players={playersList} />;
@@ -138,11 +137,29 @@ export default function MultiplayerLobby() {
 
           {showGameSelector && isHost && (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--bg-base)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', marginTop: '8px', maxHeight: '200px', overflowY: 'auto', zIndex: 50 }}>
-              {Object.values(multiPhoneGamesCatalog).map((g) => (
-                <div key={g.id} onClick={() => handleGameChange(g)} style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', color: 'white' }}>
-                  {g.title}
-                </div>
-              ))}
+              {/* UPDATED: Map over games and verify if they are unlocked */}
+              {Object.values(multiPhoneGamesCatalog).map((g) => {
+                const isUnlocked = !g.isPremium || unlockedPacks.includes(g.id);
+                
+                return (
+                  <div 
+                    key={g.id} 
+                    onClick={() => isUnlocked ? handleGameChange(g) : null} 
+                    style={{ 
+                      padding: '12px 16px', 
+                      borderBottom: '1px solid rgba(255,255,255,0.05)', 
+                      cursor: isUnlocked ? 'pointer' : 'not-allowed', 
+                      color: isUnlocked ? 'white' : 'var(--text-muted)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <span>{g.title}</span>
+                    {!isUnlocked && <span style={{ fontSize: '1.1rem' }}>🔒</span>}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

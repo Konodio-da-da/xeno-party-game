@@ -5,6 +5,7 @@ export const multiPhoneGamesCatalog = {
     id: "mostLikelyTo",
     title: "Most Likely To",
     category: "Multi-Phone",
+    isPremium: false, // FREE
     description: "Anonymous voting engine where players vote on who fits the prompt best.",
     prompts: [
       "Most likely to fight a bouncer at a club over a VIP section they didn't pay for",
@@ -61,6 +62,7 @@ export const multiPhoneGamesCatalog = {
     id: "confessionBooth",
     title: "Confession Booth",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Everyone types an anonymous secret. The app displays one, and the group votes on whose it is.",
     prompts: [
       "Type a secret or embarrassing confession below:",
@@ -107,6 +109,7 @@ export const multiPhoneGamesCatalog = {
     id: "fillInTheBlank",
     title: "Fill in the Blank",
     category: "Multi-Phone",
+    isPremium: false, // FREE
     description: "Submit your funniest custom answers to the main prompt. The Judge picks the winner.",
     prompts: [
       "The only thing better than amapiano at 3 AM is _____.",
@@ -152,6 +155,7 @@ export const multiPhoneGamesCatalog = {
     id: "imposterGame",
     title: "The Imposter / Spyfall",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Everyone receives the secret location/topic except one person. Ask vague questions to expose them.",
     prompts: [
       { secretLocation: "A VIP Nightclub VIP Lounge", imposterHint: "You have NO IDEA where you are." },
@@ -170,6 +174,7 @@ export const multiPhoneGamesCatalog = {
     id: "triviaRoulette",
     title: "Trivia Roulette",
     category: "Multi-Phone",
+    isPremium: false, // FREE
     description: "Fast-paced trivia. Answer wrong, your phone vibrates and tells you to drink.",
     prompts: [
       { q: "What year was the first iPhone released?", options: ["2005", "2007", "2009"], answer: "2007" },
@@ -188,6 +193,7 @@ export const multiPhoneGamesCatalog = {
     id: "hotSeat",
     title: "Hot Seat (Interrogation)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "One player is selected. Everyone else secretly submits questions for them to answer live.",
     prompts: [
       "The Hot Seat player is answering questions submitted secretly by the room.",
@@ -200,6 +206,7 @@ export const multiPhoneGamesCatalog = {
     id: "drawingBoard",
     title: "Drawing Board (Pictionary)",
     category: "Multi-Phone",
+    isPremium: false, // FREE
     description: "Draw prompts on your phone screen. Results broadcast to the main screen for guessing.",
     prompts: [
       "Draw: 'An alien trying to order fast food'",
@@ -213,6 +220,7 @@ export const multiPhoneGamesCatalog = {
     id: "twoTruthsAndALie",
     title: "Two Truths & a Lie",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Submit three statements via your phone. The room locks in their guesses.",
     prompts: ["Submit 2 true statements and 1 absolute lie about yourself."]
   },
@@ -220,6 +228,7 @@ export const multiPhoneGamesCatalog = {
     id: "biddingWar",
     title: "Bidding War",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Harsh dares appear. Players bid how many drinks they will take to avoid it. Lowest bidder performs it.",
     prompts: ["Dare: Let someone go through your camera roll for 60 seconds. Bid how many sips you'll take to skip it."]
   },
@@ -227,6 +236,7 @@ export const multiPhoneGamesCatalog = {
     id: "matchmaker",
     title: "Matchmaker",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Secretly vote on who you think is the best match in the room. Results revealed at the end.",
     prompts: ["Secretly vote for the most chaotic duo in the room."]
   },
@@ -234,6 +244,7 @@ export const multiPhoneGamesCatalog = {
     id: "oddsMaker",
     title: "Odds Maker (The Betting Engine)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Players look at live odds and bet their own drinks on whether a player will succeed or fail a dare.",
     prompts: ["Place your bets: Will [Player A] successfully do 20 back-to-back jumping jacks? Yes or No."]
   },
@@ -241,6 +252,7 @@ export const multiPhoneGamesCatalog = {
     id: "fakeNews",
     title: "Fake News / Bluff",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "One person gets a bizarre true fact; others get fake ones. Pitch them and vote on the real one.",
     prompts: ["Pitch your fact to the room and convince them it is the real one."]
   },
@@ -248,6 +260,7 @@ export const multiPhoneGamesCatalog = {
     id: "memeGenerator",
     title: "The Meme Generator",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Main screen shows an awkward photo. Type a caption; room votes for the best one.",
     prompts: ["Write a caption for the photo on the screen."]
   },
@@ -255,6 +268,7 @@ export const multiPhoneGamesCatalog = {
     id: "pitchPerfect",
     title: "Pitch Perfect (Shark Tank)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Receive two random words. Pitch your product invention to the room within 30 seconds.",
     prompts: ["Your random words: 'Toothbrush' + 'Chainsaw'. Pitch your product!"]
   },
@@ -262,6 +276,7 @@ export const multiPhoneGamesCatalog = {
     id: "roastBattle",
     title: "Roast Battle",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Text your best roast about your paired opponent. Room votes on the winner.",
     prompts: ["Send your best, funniest roast against your matched opponent."]
   },
@@ -269,6 +284,7 @@ export const multiPhoneGamesCatalog = {
     id: "theSyndicate",
     title: "The Syndicate (Hidden Roles)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Social deduction game. Secret roles (Cops, Mob Boss, Goons) assigned via app. Debate and vote.",
     prompts: ["Check your secret phone screen for your role. Don't let the cops find you."]
   },
@@ -276,6 +292,7 @@ export const multiPhoneGamesCatalog = {
     id: "wordSneak",
     title: "Word Sneak",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Slip 3 unusual words into casual conversation without getting called out.",
     prompts: ["Your secret words to slip in: 'Platypus', 'Microwave', 'Algebra'."]
   },
@@ -283,6 +300,7 @@ export const multiPhoneGamesCatalog = {
     id: "tabooDigital",
     title: "Taboo (Digital)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Describe a target word to the room without using 5 forbidden words.",
     prompts: ["Target Word: 'Airport'. Forbidden: Plane, Travel, Fly, Baggage, Ticket."]
   },
@@ -290,6 +308,7 @@ export const multiPhoneGamesCatalog = {
     id: "brokenPicture",
     title: "Broken Picture",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Draw a prompt, pass drawing to next player to guess text, pass text to draw again.",
     prompts: ["Draw the prompt on your screen."]
   },
@@ -297,6 +316,7 @@ export const multiPhoneGamesCatalog = {
     id: "upvoteDownvote",
     title: "Upvote / Downvote",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Type a controversial opinion. Room upvotes or downvotes. Downvoted to oblivion = drink.",
     prompts: [
       "Type your most controversial hot take about modern dating.",
@@ -313,6 +333,7 @@ export const multiPhoneGamesCatalog = {
     id: "rankEm",
     title: "Rank 'Em",
     category: "Multi-Phone",
+    isPremium: false, // FREE
     description: "State your choice based on the topic. Everyone ranks the combined pool, and last place drinks!",
     prompts: [
       "State your top film of all time:",
@@ -325,6 +346,7 @@ export const multiPhoneGamesCatalog = {
     id: "triviaSurvival",
     title: "Trivia Survival (Battle Royale)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Simultaneous trivia. Get one wrong and your phone screen digital-shatters. Last standing wins.",
     prompts: [
       { q: "What is the capital of Nigeria?", options: ["Lagos", "Abuja", "Kano", "Port Harcourt"], answer: "Abuja" },
@@ -335,6 +357,7 @@ export const multiPhoneGamesCatalog = {
     id: "baitAndSwitch",
     title: "Bait & Switch",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Answer an innocent question. App flips the main screen question to something terrible.",
     prompts: ["Answer: 'What is your favorite weekend activity?'"]
   },
@@ -342,6 +365,7 @@ export const multiPhoneGamesCatalog = {
     id: "soundboard",
     title: "The Soundboard (DJ Mode)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Every player gets a sound effect button. Hit your sound at the exact right comedic timing.",
     prompts: ["Your sound button: Airhorn / Fart / Dramatic Gasp."]
   },
@@ -349,6 +373,7 @@ export const multiPhoneGamesCatalog = {
     id: "grandFinale",
     title: "The Grand Finale (Boss Fight)",
     category: "Multi-Phone",
+    isPremium: true, // PAID
     description: "Frantic co-op mini-game rush. Share a collective health bar or everyone drinks.",
     prompts: ["CO-OP BOSS BATTLE ACTIVE! Tap fast, clear tasks before health hits zero!"]
   }
