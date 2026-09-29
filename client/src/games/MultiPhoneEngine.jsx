@@ -2,15 +2,16 @@
 import { useState, useEffect } from 'react';
 import { socket } from '../socket';
 import { multiPhoneGamesCatalog } from '../data/multiPhoneGames';
+import { adultGamesCatalog } from '../data/adultGamesCatalog'; // <-- Added adult catalog
 import { Send, CheckCircle2, Trophy, Flame, ArrowLeft, ShieldQuestion, Timer } from 'lucide-react';
 import DrawingCanvas from '../components/DrawingCanvas';
 import SoundboardUI from './custom/SoundboardUI';
 import { useStatsStore } from '../store/statsStore'; 
 
-export default function MultiPhoneEngine({ roomCode, players, gameType }) {
+// ADDED: freakLevel prop with a default fallback
+export default function MultiPhoneEngine({ roomCode, players, gameType, freakLevel = 'spicy' }) {
   const recordGamePlayed = useStatsStore((state) => state.recordGamePlayed);
   
-  // Identify the player by their unique live socket connection
   const myPlayer = players.find(p => p.id === socket.id);
   const myName = myPlayer ? myPlayer.name : "Unknown";
   const isHost = myPlayer ? myPlayer.isHost : false;
@@ -19,9 +20,10 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
     return <SoundboardUI roomCode={roomCode} players={players} />;
   }
   
-  const gameData = multiPhoneGamesCatalog[gameType] || Object.values(multiPhoneGamesCatalog)[0];
+  // COMBINE CATALOGS
+  const combinedCatalog = { ...multiPhoneGamesCatalog, ...adultGamesCatalog };
+  const gameData = combinedCatalog[gameType] || Object.values(combinedCatalog)[0];
   
-  // Detect Game Types
   const isDrawingGame = gameType === 'drawingBoard' || gameData?.id === 'drawingBoard';
   const isTwoTruths = gameType.includes('twoTruths') || gameData?.id?.includes('twoTruths');
   const isTrivia = gameType.includes('trivia') || gameData?.id?.includes('trivia');
@@ -29,7 +31,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
   const isUpvoteDownvote = gameType.includes('upvote') || gameData?.id?.includes('upvote');
   const isImposterGame = gameType.includes('imposter') || gameType.includes('spyfall') || gameData?.id?.includes('imposter') || gameData?.id?.includes('spyfall') || gameData?.title?.toLowerCase().includes('imposter');
 
-  // Universal State
   const [promptIndex, setPromptIndex] = useState(0);
   const [phase, setPhase] = useState('input');
   const [inputText, setInputText] = useState('');
@@ -38,36 +39,30 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
   const [selectedVote, setSelectedVote] = useState(null);
   const [results, setResults] = useState(null);
 
-  // TTOL State
   const [ttolInputs, setTtolInputs] = useState({ truth1: '', truth2: '', lie: '' });
   const [ttolActiveSet, setTtolActiveSet] = useState(null);
-
-  // Trivia State
   const [timeLeft, setTimeLeft] = useState(6);
-
-  // Rank 'Em & Upvote State
   const [singleRankInput, setSingleRankInput] = useState('');
   const [sortableItems, setSortableItems] = useState([]);
   const [activeOpinion, setActiveOpinion] = useState(null);
   const [opinionResult, setOpinionResult] = useState(null);
-
-  // Imposter State
   const [imposterData, setImposterData] = useState(null);
   const [accuseCooldown, setAccuseCooldown] = useState(0);
   const [autoContinueTimer, setAutoContinueTimer] = useState(3);
 
-  const promptsList = gameData?.prompts || [{ text: "Respond to the prompt!" }];
+  // UPDATED: Dynamically select prompts array based on Freakish Level
+  let basePrompts = gameData?.prompts || [{ text: "Respond to the prompt!" }];
+  const promptsList = Array.isArray(basePrompts) ? basePrompts : (basePrompts[freakLevel] || basePrompts['spicy'] || [{ text: "Respond to the prompt!" }]);
+  
   const currentPrompt = promptsList[promptIndex] || promptsList[0];
   const promptText = typeof currentPrompt === 'string' ? currentPrompt : (currentPrompt.text || currentPrompt.q || currentPrompt.secretLocation || "Respond to the prompt!");
 
   useEffect(() => {
-    const activeGameData = multiPhoneGamesCatalog[gameType] || Object.values(multiPhoneGamesCatalog)[0];
-    if (activeGameData) {
-      recordGamePlayed(gameType, activeGameData.title);
+    if (gameData) {
+      recordGamePlayed(gameType, gameData.title);
     }
-  }, [gameType, recordGamePlayed]);
+  }, [gameType, recordGamePlayed, gameData]);
   
-  // TRIVIA TIMER EFFECT
   useEffect(() => {
     if (isTrivia && phase === 'input' && !hasSubmitted) {
       if (timeLeft > 0) {
@@ -79,7 +74,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
     }
   }, [isTrivia, phase, hasSubmitted, timeLeft]);
 
-  // ACCUSATION COOLDOWN TICKER
   useEffect(() => {
     if (accuseCooldown > 0) {
       const timer = setTimeout(() => setAccuseCooldown(c => c - 1), 1000);
@@ -87,7 +81,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
     }
   }, [accuseCooldown]);
 
-  // AUTO-CONTINUE TICKER ON IMPOSTER RESULTS
   useEffect(() => {
     if (phase === 'imposter-results') {
       setAutoContinueTimer(3);
@@ -96,7 +89,7 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
           if (prev <= 1) {
             clearInterval(interval);
             setPhase('imposter-role');
-            setAccuseCooldown(20); // Reset 20s cooldown universally when back on role page
+            setAccuseCooldown(20);
             return 0;
           }
           return prev - 1;
@@ -106,15 +99,13 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
     }
   }, [phase]);
 
-  // IMPOSTER AUTO-START (Host triggers role assignment)
   useEffect(() => {
     if (isImposterGame && isHost && phase === 'input') {
-      const catalog = gameData?.prompts || [{ secretLocation: "A VIP Nightclub" }];
+      const catalog = promptsList;
       socket.emit('start-imposter-game', { roomCode, locationsCatalog: catalog });
     }
-  }, [isImposterGame, isHost, phase]);
+  }, [isImposterGame, isHost, phase, promptsList]);
 
-  // SOCKET LISTENERS
   useEffect(() => {
     socket.on('start-voting-phase', (anonymousAnswers) => {
       setVotingPool(anonymousAnswers);
@@ -177,7 +168,7 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
     socket.on('imposter-role-assigned', (data) => {
       setImposterData(data);
       setPhase('imposter-role');
-      setAccuseCooldown(20); // 20s cooldown starts immediately upon entering role page
+      setAccuseCooldown(20); 
       setHasSubmitted(false);
       setSelectedVote(null);
     });
@@ -225,8 +216,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
       socket.off('advance-prompt');
     };
   }, [promptsList.length]);
-
-  // --- HANDLERS ---
   
   const handleReturnToLobby = () => {
     socket.emit('return-to-lobby', { roomCode });
@@ -351,7 +340,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         <div style={{ width: '60px' }}></div> 
       </header>
 
-      {/* Persistent Prompt Card */}
       {!isImposterGame && phase !== 'ttol-voting' && phase !== 'ttol-results' && phase !== 'trivia-results' && phase !== 'rank-sorting' && phase !== 'rank-leaderboard' && phase !== 'opinion-voting' && phase !== 'opinion-reveal' && (
         <div style={{ backgroundColor: 'var(--bg-surface)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', zIndex: 1 }}>
           <Flame size={24} color="var(--accent-pink)" style={{ margin: '0 auto 10px' }} />
@@ -361,7 +349,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* IMPOSTER: WAITING */}
       {isImposterGame && phase === 'input' && (
         <div style={{ padding: '40px 20px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
           <Flame size={32} color="var(--accent-pink)" style={{ margin: '0 auto 15px', animation: 'pulse 1.5s infinite' }} />
@@ -370,7 +357,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* PHASE 1: STANDARD INPUT */}
       {!isImposterGame && phase === 'input' && (
         <>
           {hasSubmitted ? (
@@ -458,7 +444,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </>
       )}
 
-      {/* IMPOSTER: ROLE REVEAL PHASE */}
       {phase === 'imposter-role' && imposterData && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'center' }}>
           <h2 style={{ color: 'var(--accent-cyan)', fontSize: '1.4rem' }}>Your Secret Role</h2>
@@ -497,7 +482,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* IMPOSTER: VOTING PHASE */}
       {phase === 'imposter-voting' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'center' }}>
           <h2 style={{ color: '#FF1E56', fontSize: '1.4rem' }}>Who is the Imposter?</h2>
@@ -525,7 +509,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* IMPOSTER: RESULTS PHASE WITH 3S AUTO-CONTINUE */}
       {phase === 'imposter-results' && results && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
           <h2 style={{ color: 'white', fontSize: '1.4rem' }}>Accusation Verdict</h2>
@@ -562,7 +545,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* PHASE 2.5: TTOL VOTING */}
       {phase === 'ttol-voting' && ttolActiveSet && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h2 style={{ color: 'white', textAlign: 'center', fontSize: '1.4rem' }}>
@@ -603,7 +585,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* RANK 'EM SORTING PHASE (Drag/Pull UI) */}
       {phase === 'rank-sorting' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <h2 style={{ color: 'white', textAlign: 'center', fontSize: '1.2rem' }}>Order from Best to Worst</h2>
@@ -633,7 +614,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* RANK 'EM LEADERBOARD PHASE */}
       {phase === 'rank-leaderboard' && results && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <h3 style={{ textAlign: 'center', color: 'var(--accent-cyan)' }}>Official Room Ranking</h3>
@@ -657,7 +637,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* OPINION VOTING PHASE (Upvote / Downvote) */}
       {phase === 'opinion-voting' && activeOpinion && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'center' }}>
           <h2 style={{ color: 'var(--accent-pink)', fontSize: '1.2rem' }}>Hot Take by {activeOpinion.author}</h2>
@@ -681,7 +660,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* OPINION SCORE REVEAL */}
       {phase === 'opinion-reveal' && opinionResult && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'center' }}>
           <h2 style={{ color: 'white', fontSize: '1.4rem' }}>{opinionResult.author}'s Verdict</h2>
@@ -700,7 +678,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* PHASE 3.5: TTOL RESULTS */}
       {phase === 'ttol-results' && results && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h2 style={{ color: 'white', textAlign: 'center', fontSize: '1.4rem' }}>
@@ -734,7 +711,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* PHASE 3.6: TRIVIA RESULTS */}
       {phase === 'trivia-results' && results && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ padding: '20px', background: 'var(--bg-surface)', borderRadius: '16px', textAlign: 'center', border: '2px solid var(--accent-cyan)' }}>
@@ -769,7 +745,6 @@ export default function MultiPhoneEngine({ roomCode, players, gameType }) {
         </div>
       )}
 
-      {/* UNIVERSAL VOTING / RESULTS CODE */}
       {phase === 'voting' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <p style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>

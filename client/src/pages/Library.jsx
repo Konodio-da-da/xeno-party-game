@@ -1,11 +1,12 @@
 // client/src/pages/Library.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Smartphone, Users, Flame, Skull, ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import { Smartphone, Users, Flame, Skull, ChevronDown, ChevronUp, Lock, Heart } from 'lucide-react';
 import GameModal from '../components/GameModal';
 import ShopModal from '../components/ShopModal';
 import { singlePhoneGamesCatalog } from '../data/singlePhoneGames';
 import { multiPhoneGamesCatalog } from '../data/multiPhoneGames';
+import { adultGamesCatalog } from '../data/adultGamesCatalog'; // <-- Added new catalog
 import { usePlayerStore } from '../store/playerStore';
 import { useShopStore } from '../store/shopStore';
 import { expansionPacks } from '../data/expansionPacks';
@@ -13,13 +14,12 @@ import { expansionPacks } from '../data/expansionPacks';
 export default function Library() {
   const navigate = useNavigate();
   const [selectedGame, setSelectedGame] = useState(null);
-  const [openSection, setOpenSection] = useState('single'); // Default open single player
+  const [openSection, setOpenSection] = useState('single'); 
   const [isShopOpen, setIsShopOpen] = useState(false);
   
   const players = usePlayerStore((state) => state.players);
   const { isPackUnlocked } = useShopStore();
 
-  // Helper to check if a game is locked behind a premium pack
   const getRequiredPack = (gameId) => {
     return expansionPacks.find(pack => pack.gamesIncluded.includes(gameId));
   };
@@ -27,31 +27,25 @@ export default function Library() {
   const handleGameSelect = (game, category) => {
     const requiredPack = getRequiredPack(game.id);
     
-    // If the game belongs to a premium pack and it is NOT unlocked
     if (requiredPack && !isPackUnlocked(requiredPack.id)) {
       setIsShopOpen(true);
-      return; // Stop the game from opening
+      return; 
     }
 
-    // Otherwise, open the game details modal
     setSelectedGame({ ...game, category });
   };
 
   const handleStartGame = (game) => {
     setSelectedGame(null);
-    if (game.category === "Single Phone") {
-      // Check if we already have at least 2 valid players set up
+    if (game.playMode === "single-phone" || game.category === "Single Phone") {
       const hasEnoughPlayers = players && players.filter(p => p.trim() !== '').length >= 2;
 
       if (hasEnoughPlayers) {
-        // Blast them straight into the game!
         navigate(`/play/${game.id}`);
       } else {
-        // Passes the clicked game ID directly to player setup
         navigate('/setup-players', { state: { targetGameId: game.id } });
       }
     } else {
-      // Passes the selected multiplayer game directly to the lobby
       navigate('/multiplayer', { state: { selectedGame: game } });
     }
   };
@@ -91,16 +85,10 @@ export default function Library() {
                   key={game.id}
                   onClick={() => handleGameSelect(game, 'Single Phone')}
                   style={{ 
-                    backgroundColor: 'var(--bg-surface)', 
-                    padding: '16px 20px', 
-                    borderRadius: '12px', 
+                    backgroundColor: 'var(--bg-surface)', padding: '16px 20px', borderRadius: '12px', 
                     border: isLocked ? '1px solid rgba(255, 255, 255, 0.02)' : '1px solid rgba(255, 255, 255, 0.05)', 
-                    cursor: 'pointer', 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    opacity: isLocked ? 0.5 : 1, // Dim locked games
-                    transition: 'opacity 0.2s'
+                    cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    opacity: isLocked ? 0.5 : 1, transition: 'opacity 0.2s'
                   }}
                 >
                   <div>
@@ -143,16 +131,10 @@ export default function Library() {
                   key={game.id}
                   onClick={() => handleGameSelect(game, 'Multi-Phone')}
                   style={{ 
-                    backgroundColor: 'var(--bg-surface)', 
-                    padding: '16px 20px', 
-                    borderRadius: '12px', 
+                    backgroundColor: 'var(--bg-surface)', padding: '16px 20px', borderRadius: '12px', 
                     border: isLocked ? '1px solid rgba(255, 255, 255, 0.02)' : '1px solid rgba(255, 255, 255, 0.05)', 
-                    cursor: 'pointer', 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    opacity: isLocked ? 0.5 : 1, // Dim locked games
-                    transition: 'opacity 0.2s'
+                    cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    opacity: isLocked ? 0.5 : 1, transition: 'opacity 0.2s'
                   }}
                 >
                   <div>
@@ -164,6 +146,53 @@ export default function Library() {
                     </p>
                   </div>
                   {isLocked ? <Lock size={20} color="var(--text-muted)" /> : <Skull size={20} color="var(--accent-cyan)" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* NEW: Couples & 18+ Section */}
+      <section>
+        <div 
+          onClick={() => toggleSection('adult')}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: 'var(--bg-surface)', borderRadius: '16px', cursor: 'pointer', border: openSection === 'adult' ? '1px solid #FF1E56' : '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Heart size={24} color="#FF1E56" />
+            <h2 style={{ fontSize: '1.2rem', color: 'white' }}>Couples & 21+</h2>
+          </div>
+          {openSection === 'adult' ? <ChevronUp color="var(--text-muted)" /> : <ChevronDown color="var(--text-muted)" />}
+        </div>
+        
+        {openSection === 'adult' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', paddingLeft: '10px' }}>
+            {Object.values(adultGamesCatalog).map((game) => {
+              const requiredPack = getRequiredPack(game.id);
+              const isLocked = requiredPack && !isPackUnlocked(requiredPack.id);
+
+              return (
+                <div 
+                  key={game.id}
+                  onClick={() => handleGameSelect(game, game.playMode === 'single-phone' ? 'Single Phone' : 'Multi-Phone')}
+                  style={{ 
+                    backgroundColor: 'var(--bg-surface)', padding: '16px 20px', borderRadius: '12px', 
+                    border: isLocked ? '1px solid rgba(255, 255, 255, 0.02)' : '1px solid rgba(255, 255, 255, 0.05)', 
+                    cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    opacity: isLocked ? 0.5 : 1, transition: 'opacity 0.2s'
+                  }}
+                >
+                  <div>
+                    <h3 style={{ fontSize: '1.05rem', marginBottom: '4px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {game.title} {isLocked && <Lock size={16} color="#FF1E56" />}
+                      {game.isCouplesGame && <span style={{fontSize: '0.7rem', backgroundColor: 'rgba(255, 30, 86, 0.2)', color: '#FF1E56', padding: '2px 6px', borderRadius: '4px'}}>COUPLES</span>}
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      {isLocked ? `Requires: ${requiredPack?.title || 'Premium Unlock'}` : game.description}
+                    </p>
+                  </div>
+                  {isLocked ? <Lock size={20} color="var(--text-muted)" /> : <Flame size={20} color="#FF1E56" />}
                 </div>
               );
             })}

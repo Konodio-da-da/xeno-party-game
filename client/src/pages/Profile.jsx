@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { useStatsStore } from '../store/statsStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { Trophy, Flame, Activity, Volume2, Vibrate, Trash2, Edit2, Check } from 'lucide-react';
+import { Mail } from 'lucide-react'; 
+// (Keep your other existing imports here)
 
 export default function Profile() {
   const { playerName, setPlayerName, totalGamesPlayed, gameCounts, recentActivity, clearStats } = useStatsStore();
@@ -91,6 +93,9 @@ export default function Profile() {
         </div>
       </div>
 
+     
+
+
       {totalGamesPlayed > 0 && (
         <div style={{ textAlign: 'center' }}>
           <button 
@@ -101,6 +106,31 @@ export default function Profile() {
           </button>
         </div>
       )}
+       {/* SUPPORT SECTION */}
+<div style={{ marginTop: '20px', backgroundColor: 'var(--bg-surface)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+  <h3 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+    Help & Support
+  </h3>
+  
+  <a 
+    href="mailto:zahantom@gmail.com?subject=XENO%20Party%20Game%20Support"
+    style={{ 
+      display: 'flex', alignItems: 'center', gap: '15px', color: 'white', textDecoration: 'none', 
+      padding: '12px', backgroundColor: 'var(--bg-base)', borderRadius: '12px', 
+      border: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' 
+    }}
+  >
+    <div style={{ padding: '10px', backgroundColor: 'rgba(0, 240, 255, 0.1)', borderRadius: '10px' }}>
+      <Mail size={22} color="var(--accent-cyan)" />
+    </div>
+    <div>
+      <div style={{ fontWeight: 'bold', fontSize: '1.05rem' }}>Contact Developer</div>
+      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+        Report a bug, payment issue, or suggest an idea
+      </div>
+    </div>
+  </a>
+</div>
     </div>
   );
 }
