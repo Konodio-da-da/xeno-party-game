@@ -12,7 +12,7 @@ export default function ShopModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handlePurchase = async (pack) => {
+    const handlePurchase = async (pack) => {
     if (!userEmail) {
       setMessage({ text: 'Please enter your email to proceed with the purchase.', type: 'error' });
       return;
@@ -22,12 +22,24 @@ export default function ShopModal({ isOpen, onClose }) {
     setMessage({ text: 'Connecting to server...', type: 'success' });
 
     try {
-      const priceInKobo = pack.id === 'spicyLagos' ? 150000 : 200000;
+      // BULLETPROOF PRICE EXTRACTOR:
+      // Tries to use numericPrice. If missing, it extracts "1,500" from "1,500 NGN", removes the comma, and converts to 1500.
+      let rawPrice = pack.numericPrice;
+      if (!rawPrice) {
+        rawPrice = parseInt(pack.price.split(' ')[0].replace(/,/g, ''), 10);
+      }
+      
+      const priceInKobo = rawPrice * 100;
 
-      // Automatically switches to Railway/live URL if defined, otherwise falls back to localhost
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-      console.log("Sending checkout request to backend...", { packId: pack.id, email: userEmail });
+      // Log the exact payload to your browser console so you can see the math working
+      console.log("Sending checkout payload:", { 
+        packId: pack.id, 
+        rawPriceExtracted: rawPrice,
+        priceInKobo: priceInKobo,
+        email: userEmail 
+      });
 
       const response = await fetch(`${API_URL}/api/create-checkout-session`, {
         method: 'POST',
@@ -55,6 +67,7 @@ export default function ShopModal({ isOpen, onClose }) {
       setIsProcessing(false);
     }
   };
+
 
   const handleRestore = async () => {
     if (!userEmail) {
@@ -138,7 +151,7 @@ export default function ShopModal({ isOpen, onClose }) {
                     <h3 style={{ fontSize: '1.1rem', color: 'white', margin: '0 0 4px 0' }}>{pack.title}</h3>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{pack.description}</p>
                   </div>
-                  <span style={{ fontWeight: 'bold', color: pack.color, fontSize: '0.95rem', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '8px' }}>
+                  <span style={{ fontWeight: 'bold', color: pack.color || 'var(--accent-pink)', fontSize: '0.95rem', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '8px' }}>
                     {pack.price}
                   </span>
                 </div>
